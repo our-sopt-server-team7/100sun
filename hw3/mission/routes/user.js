@@ -4,6 +4,7 @@ let User = require('../models/user');
 let util = require('../modules/util');
 let statusCode = require('../modules/statusCode');
 let resMessage = require('../modules/responseMessage');
+const crypto = require('crypto'); // LEVEL 2
 
 /* 
     ✔️ sign up
@@ -36,20 +37,28 @@ router.post('/signup', async (req, res) => {
             .send(util.fail(statusCode.BAD_REQUEST, resMessage.ALREADY_ID)); // fail : return bad request 
         return;
     }
-    // 2. push user to user.js
-    User.push({
-        id,
-        name,
-        password,
-        email
+    // LEVEL 2
+    const salt = crypto.randomBytes(32).toString('hex');
+    crypto.pbkdf2(password, salt.toString(), 1, 32, 'sha512', (err, derivedKey) => {
+        if (err) throw err;
+        const hashed = derivedKey.toString('hex');
+        // 2. push user to user.js
+        User.push({
+            id,
+            name,
+            hashed,
+            email,
+            salt
+        });
+        // 3. util.success) send response data
+        // status(status_code) : integer
+        res.status(statusCode.OK)
+            // send(json) : Communication w/ front is smooth only when "regular data" is sent      
+            .send(util.success(statusCode.OK, resMessage.CREATED_USER, {
+                userId: id
+            }));
+
     });
-    // 3. util.success) send response data
-    // status(status_code) : integer
-    res.status(statusCode.OK)
-        // send(json) : Communication w/ front is smooth only when "regular data" is sent      
-        .send(util.success(statusCode.OK, resMessage.CREATED_USER, {
-            userId: id
-        }));
 });
 
 /* 
