@@ -1,3 +1,5 @@
+// dummy data of user
+
 module.exports = [
     {
         id: 'gngsn',

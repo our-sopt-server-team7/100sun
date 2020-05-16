@@ -1,3 +1,4 @@
+// JSON response 
 module.exports = {
     success: (status, message, data) => {
         return {
