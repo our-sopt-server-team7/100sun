@@ -1,21 +1,12 @@
 var express = require('express');
 var router = express.Router();
-let User = require('../models/user');
 let util = require('../modules/util');
 let statusCode = require('../modules/statusCode');
 let resMessage = require('../modules/responseMessage');
+let User = require('../models/user');
 const crypto = require('crypto'); // LEVEL 2
 
-/* 
-    ✔️ sign up
-    METHOD : POST
-    URI : localhost:3000/user/signup
-    REQUEST BODY : id, name, password, email
-    RESPONSE STATUS : 200 (OK)
-    RESPONSE DATA : User ID
-*/
-
-//    method    path        request response
+// ================= LEVEL 1 ==================
 router.post('/signup', async (req, res) => {
     // 1. get request data 
     const {
@@ -37,7 +28,7 @@ router.post('/signup', async (req, res) => {
             .send(util.fail(statusCode.BAD_REQUEST, resMessage.ALREADY_ID)); // fail : return bad request 
         return;
     }
-    // LEVEL 2
+    // ================= LEVEL 2 ==================
     const salt = crypto.randomBytes(32).toString('hex');
     crypto.pbkdf2(password, salt.toString(), 1, 32, 'sha512', (err, derivedKey) => {
         if (err) throw err;
@@ -57,18 +48,9 @@ router.post('/signup', async (req, res) => {
             .send(util.success(statusCode.OK, resMessage.CREATED_USER, {
                 userId: id
             }));
-
     });
 });
 
-/* 
-    ✔️ sign in
-    METHOD : POST
-    URI : localhost:3000/user/signin
-    REQUEST BODY : id, name
-    RESPONSE STATUS : 200 (OK)
-    RESPONSE DATA : User ID
-*/
 router.post('/signin', async (req, res) => {
     // 1.
     const {
@@ -88,34 +70,31 @@ router.post('/signin', async (req, res) => {
             .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER)); // not : return no user
         return;
     }
-    // 4-3.
-    if (user[0].password !== password) { // check if it is same with user's pwd
-        res.status(statusCode.BAD_REQUEST)
-            .send(util.fail(statusCode.BAD_REQUEST, resMessage.MISS_MATCH_PW)); // not : return Miss match password 
-        return;
-    }
-    // 3. 
-    res.status(statusCode.OK) // check if success   
-        .send(util.success(statusCode.OK, resMessage.LOGIN_SUCCESS, {
-            userId: id // yes - return userID with login success
-        }));
+    // ================= LEVEL 2 ==================
+    crypto.pbkdf2(password, user[0].salt, 1, 21, 'sha512', (err, derivedKey) => {
+        const hashed = derivedKey.toString('hex');
+        // 4-3.
+        if (user[0].hashed !== hashed) { // check if it is same with user's pwd
+            res.status(statusCode.UNAUTHORIZED)
+                .send(util.fail(statusCode.UNAUTHORIZED, resMessage.MISS_MATCH_PW)); // not : return Miss match password 
+            return;
+        }
+        // 3. 
+        res.status(statusCode.OK) // check if success   
+            .send(util.success(statusCode.OK, resMessage.LOGIN_SUCCESS, {
+                userId: id // yes - return userID with login success
+            }));
+    });
 });
 
-/* 
-    ✔️ get profile
-    METHOD : GET
-    URI : localhost:3000/user/profile/:id
-    RESPONSE STATUS : 200 (OK)
-    RESPONSE DATA : User Id, name, email
-*/
 router.get('/profile/:id', async (req, res) => {
     // 1.
     const id = req.params.id;
     const user = User.filter(user => user.id == id)[0];
     // 4-1.
-    if (user === undefined) {
+    if (user.length == 0) { // check if the id exists
         res.status(statusCode.BAD_REQUEST)
-            .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER));
+            .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER)); // not : return no user
         return;
     }
     // 3. 성공 - login success와 함께 user Id 반환

@@ -14,5 +14,12 @@ module.exports = {
     MISS_MATCH_PW: "비밀번호가 맞지 않습니다.",
     
     // 프로필 조회
-    READ_PROFILE_SUCCESS: "프로필 조회 성공"
+    READ_PROFILE_SUCCESS: "프로필 조회 성공",
+
+    // 포스팅
+    POSTING_SUCCESS : "포스팅 성공",
+    UPDATE_POST_SUCCESS : "포스트 업데이트 성공",
+    DELETE_POST_SUCCESS : "포스트 삭제 성공",
+    POSTING_FAIL : "포스팅 실패",
+    NO_POST: "존재하지 않는 포스트입니다.",
 };
