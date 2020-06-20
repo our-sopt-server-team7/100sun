@@ -1,7 +1,7 @@
 # 1. Sign-up
 
-![signup](./img/signup.jpg)
+![signup](./img/signup. JPG)
 
 # 2. Sign-in
 
-![signin](./img/signin.jpg)
+![signin](./img/signin. JPG)

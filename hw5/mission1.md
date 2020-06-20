@@ -1,3 +1,3 @@
 # 1. ERD
 
-![erd](./img/erd.jpg)
+![erd](./img/erd. JPG)
