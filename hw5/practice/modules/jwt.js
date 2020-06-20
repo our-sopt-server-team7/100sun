@@ -8,20 +8,19 @@ const TOKEN_INVALID = -2;
 module.exports = {
     sign: async (user) => {
         const payload = {
-            idx: user.userIdx,
+            idx: user.useridx,
             name: user.name
         };
         const result = {
-            // 로그인 인증 성공 후 sign() 통해 access token 발급
             token: jwt.sign(payload, secretKey, options),
             refreshToken: randToken.uid(256)
         };
-        return result; 
+        return result;
     },
     verify: async (token) => {
         let decoded;
         try {
-            decoded = jwt.verify(token, secretKey); // verify() of jwt module do decoding for them
+            decoded = jwt.verify(token, secretKey);
         } catch (err) {
             if (err.message === 'jwt expired') {
                 console.log('expired token');
